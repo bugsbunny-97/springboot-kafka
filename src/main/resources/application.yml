@@ -1,0 +1,51 @@
+spring:
+  application:
+    name: springboot-kafka-demo
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      properties:
+        spring.json.add.type.headers: false
+        max.block.ms: 10000
+    consumer:
+      group-id: ${KAFKA_CONSUMER_GROUP:kafka-demo-group}
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.use.type.headers: false
+        spring.json.value.default.type: com.example.kafkademo.model.Message
+    listener:
+      concurrency: ${KAFKA_CONSUMER_CONCURRENCY:3}
+    admin:
+      fail-fast: false
+      properties:
+        request.timeout.ms: 5000
+        default.api.timeout.ms: 10000
+
+server:
+  port: 8080
+  shutdown: graceful
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+app:
+  topic:
+    name: ${KAFKA_TOPIC:messages}
+    partitions: ${KAFKA_TOPIC_PARTITIONS:3}
+    replicas: ${KAFKA_TOPIC_REPLICAS:1}
+
+logging:
+  level:
+    org.apache.kafka: warn
